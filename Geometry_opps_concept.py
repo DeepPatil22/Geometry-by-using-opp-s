@@ -48,6 +48,44 @@ class Sphere:
     def volume(self):
         return (4/3) * math.pi * self.radius**3
 
+"""Cube	Cuboid
+Total Surface Area = 6(side)2	Total Surface area = 2 (length × breadth + breadth × height + length × height)
+Lateral Surface Area = 4 (Side)2	Lateral Surface area = 2 height(length + breadth)
+Volume of cube = (Side)3	Volume of the cuboid = (length × breadth × height)"""
+
+
+class Cube:
+    def __init__(self, length):
+        self.length=length
+
+    def Total_surface_area(self):
+        return self.length**2 * 6
+    
+    def Volume(self):
+        side=self.lenght
+        return side**2 * 4
+    
+class Cuboid:
+    def __init__(self, length, breadth, height) :
+        self.length=length
+        self.breadth=breadth
+        self.height=height
+
+    def Total_surface_area(self):
+        length=self.length
+        breadth=self.breadth
+        height=self.height
+        return 2 * (length * breadth + breadth * height + length * height)
+    
+    def Volume(self):
+        return (self.length * self.height * self.breadth)
+    
+
+
+
+
+
+
 # Example Usage
 rectangle = Rectangle(5, 10)
 print(f"Rectangle Area: {rectangle.area()}, Perimeter: {rectangle.perimeter()}, Diagonal: {rectangle.diagonal()}")
