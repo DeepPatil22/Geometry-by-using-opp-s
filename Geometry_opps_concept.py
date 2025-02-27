@@ -56,32 +56,69 @@ Volume of cube = (Side)3	Volume of the cuboid = (length × breadth × height)"""
 
 class Cube:
     def __init__(self, length):
-        self.length=length
+        if length < 0:
+            raise ValueError("Length must be non-negative.")
+        self.__length = length  # Private attribute
 
-    def Total_surface_area(self):
-        return self.length**2 * 6
-    
-    def Volume(self):
-        side=self.lenght
-        return side**2 * 4
-    
+    def total_surface_area(self):
+        return self.__length**2 * 6
+
+    def volume(self):
+        return self.__length**3
+
+    # Getter method for length
+    def get_length(self):
+        return self.__length
+
+    # Setter method for length (with validation)
+    def set_length(self, length):
+        if length >= 0:
+            self.__length = length
+        else:
+            print("Invalid length.")
+
 class Cuboid:
-    def __init__(self, length, breadth, height) :
-        self.length=length
-        self.breadth=breadth
-        self.height=height
+    def __init__(self, length, breadth, height):
+        if length < 0 or breadth < 0 or height < 0:
+            raise ValueError("Dimensions must be non-negative.")
+        self.__length = length  # Private attributes
+        self.__breadth = breadth
+        self.__height = height
 
-    def Total_surface_area(self):
-        length=self.length
-        breadth=self.breadth
-        height=self.height
-        return 2 * (length * breadth + breadth * height + length * height)
-    
-    def Volume(self):
-        return (self.length * self.height * self.breadth)
-    
+    def total_surface_area(self):
+        return 2 * (self.__length * self.__breadth + self.__breadth * self.__height + self.__length * self.__height)
 
+    def volume(self):
+        return self.__length * self.__breadth * self.__height
 
+    # Getter methods
+    def get_length(self):
+        return self.__length
+
+    def get_breadth(self):
+        return self.__breadth
+
+    def get_height(self):
+        return self.__height
+
+    # Setter methods (with validation)
+    def set_length(self, length):
+        if length >= 0:
+            self.__length = length
+        else:
+            print("Invalid length.")
+
+    def set_breadth(self, breadth):
+        if breadth >= 0:
+            self.__breadth = breadth
+        else:
+            print("Invalid breadth.")
+
+    def set_height(self, height):
+        if height >= 0:
+            self.__height = height
+        else:
+            print("Invalid height.")
 
 
 
