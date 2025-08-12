@@ -1,0 +1,42 @@
+[project]
+name = "news-fact-verification-bot"
+version = "0.0.1"
+description = "Retrieval-augmented news claim verification bot (RAG)"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [ { name = "Your Name" } ]
+license = { text = "MIT" }
+keywords = ["RAG", "fact-checking", "llamaindex", "chroma", "nlp"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Intended Audience :: Developers"
+]
+
+dependencies = [
+  "llama-index>=0.10.0",
+  "chromadb>=0.5.0",
+  "sentence-transformers>=2.7.0",
+  "pydantic>=2.5.0",
+  "python-dotenv>=1.0.0",
+  "tqdm",
+  "requests",
+  "orjson",
+  "ragas>=0.1.9",
+  "click>=8.1.7",
+  "rank-bm25>=0.2.2"
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-cov", "ruff", "mypy"]
+llm = ["openai>=1.0.0"]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.ruff]
+line-length = 100
+
+[tool.pytest.ini_options]
+python_files = "test_*.py"
