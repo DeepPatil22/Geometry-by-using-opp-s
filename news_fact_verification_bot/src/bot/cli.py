@@ -15,7 +15,8 @@ from .schemas import LabeledClaim
 @click.option('--verdict-mode', type=click.Choice(['heuristic','llm']), default='heuristic')
 @click.option('--processed-dir', type=click.Path(exists=True), default='data/processed')
 @click.option('--baseline', is_flag=True, help='Use BM25 baseline instead of vector store (for comparison).')
-def main(claim: str | None, batch: str | None, out: str, k: int, verdict_mode: str, processed_dir: str, baseline: bool):
+@click.option('--store-retrieved', is_flag=True, help='Include retrieved doc texts in batch output (enables extended metrics).')
+def main(claim: str | None, batch: str | None, out: str, k: int, verdict_mode: str, processed_dir: str, baseline: bool, store_retrieved: bool):
     pipe = RAGPipeline(verdict_mode=verdict_mode)
     bm25 = BM25Baseline(processed_dir) if baseline else None
     Path(out).parent.mkdir(parents=True, exist_ok=True)
@@ -42,11 +43,18 @@ def main(claim: str | None, batch: str | None, out: str, k: int, verdict_mode: s
                 c = rec.get('claim') or rec.get('text')
                 if not c:
                     continue
+                retrieved_items = None
                 if bm25:
-                    v = simple_bm25_verdict_local(c)
+                    items = bm25.query(c, k=k)  # type: ignore
+                    v = simple_verdict(c, items, {"k": k, "filtered": 0, "latency_s": 0.0})
+                    retrieved_items = items
                 else:
-                    v = pipe.run_claim(c, k=k)
+                    items, stats = pipe.retriever.query(c, k=k)
+                    v = simple_verdict(c, items, stats) if verdict_mode == 'heuristic' else pipe.run_claim(c, k=k)
+                    retrieved_items = items
                 obj = v.model_dump()
+                if store_retrieved and retrieved_items:
+                    obj['retrieved'] = retrieved_items
                 if 'label' in rec:
                     obj['gold_label'] = rec['label']
                 wf.write(json.dumps(obj, ensure_ascii=False) + '\n')
