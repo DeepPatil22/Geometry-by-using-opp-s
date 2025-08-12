@@ -1,0 +1,30 @@
+# Open-source components used in News Fact Verification Bot
+
+Core Runtime:
+Chroma (vector store) - https://github.com/chroma-core/chroma
+sentence-transformers (embedding framework) - https://github.com/UKPLab/sentence-transformers
+bge-base-en model weights - https://huggingface.co/BAAI/bge-base-en
+rank-bm25 (lexical baseline) - https://github.com/dorianbrown/rank_bm25
+pydantic (data models) - https://github.com/pydantic/pydantic
+click (CLI) - https://github.com/pallets/click
+orjson (fast JSON) - https://github.com/ijl/orjson
+tqdm (progress bars) - https://github.com/tqdm/tqdm
+requests (HTTP fetch) - https://github.com/psf/requests
+python-dotenv (env vars) - https://github.com/theskumar/python-dotenv
+
+Optional / Planned:
+LlamaIndex (RAG orchestration) - https://github.com/run-llama/llama_index
+Ragas (RAG evaluation metrics) - https://github.com/explodinggradients/ragas
+OpenAI Python SDK (LLM verdicts) - https://github.com/openai/openai-python
+bge-reranker-base (reranking model) - https://huggingface.co/BAAI/bge-reranker-base
+
+Tooling / Dev:
+pytest (testing) - https://github.com/pytest-dev/pytest
+ruff (linting) - https://github.com/astral-sh/ruff
+GitHub Actions (CI) - https://github.com/actions
+
+Notes:
+1. Dense retrieval currently uses bge-base-en via sentence-transformers added to Chroma.
+2. BM25 baseline via rank-bm25 for comparative metrics.
+3. Extended evaluation metrics implemented locally; Ragas integration pending.
+4. Reranker not yet integrated; planned to improve context_precision and answer_relevancy.
