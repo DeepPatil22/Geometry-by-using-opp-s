@@ -30,20 +30,30 @@ def fetch_topic(topic: str, api_key: str, from_date: str, to_date: str, pages: i
             "pageSize": page_size,
             "page": page,
         }
-    # Merge API key header
-    req_headers = {**headers, 'X-Api-Key': api_key}
-    r = requests.get(NEWS_API_URL, params=params, headers=req_headers, timeout=30)
-        if r.status_code != 200:
-            print(f"[warn] topic={topic} page={page} status={r.status_code} body={r.text[:200]}")
+        req_headers = {**headers, 'X-Api-Key': api_key}
+        try:
+            r = requests.get(NEWS_API_URL, params=params, headers=req_headers, timeout=30)
+        except Exception as e:
+            print(f"[warn] request error topic={topic} page={page}: {e}")
             break
-        data = r.json()
+        if r.status_code == 429:
+            # rate limited: backoff and retry once
+            print("[warn] rate limit hit (429). Sleeping 2s and retrying once...")
+            time.sleep(2)
+            r = requests.get(NEWS_API_URL, params=params, headers=req_headers, timeout=30)
+        if r.status_code != 200:
+            print(f"[warn] topic={topic} page={page} status={r.status_code} body={r.text[:160]}")
+            break
+        try:
+            data = r.json()
+        except ValueError:
+            print("[warn] non-JSON response; aborting topic fetch")
+            break
         arts = data.get("articles", [])
         if not arts:
             break
-        for a in arts:
-            all_articles.append(a)
-        # simple rate limiting
-        time.sleep(0.5)
+        all_articles.extend(arts)
+        time.sleep(0.5)  # simple rate limiting
     return all_articles
 
 def normalize_articles(raw_articles: Iterable[Dict], source_tag: str = "NewsAPI") -> List[Dict]:
