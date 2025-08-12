@@ -129,6 +129,36 @@ python -m bot.evaluation --pred results/run_bm25.jsonl --gold data/eval/claims_l
 }
 ```
 
+## Component Justification Matrix
+
+| Layer | Chosen Component | Why Chosen (Key Strengths) | Trade-offs / Limits | Viable Alternatives & When to Switch |
+|-------|------------------|----------------------------|---------------------|---------------------------------------|
+| Vector Store / Retrieval | **Chroma** | Simple local persistence, mature Python API, filtering + embeddings integration | Less optimized for massive scale vs Milvus; limited advanced ANN tuning | Milvus (if you need horizontal scale), Weaviate (hybrid search), Qdrant (payload indexing, HNSW tuning) |
+| Baseline Retrieval | **rank-bm25** | Fast lexical baseline, zero embedding cost, clear precision baseline | No semantic understanding; recall drops on paraphrases | Elasticsearch/OpenSearch BM25 (if needing scalable text infra) |
+| Embeddings | **bge-base-en** | Strong semantic performance, open license, efficient size vs large models | Slightly lower recall vs larger bge-large or E5-large | bge-large-en (higher quality), e5-large-v2 (robust), Instructor-large (task-aware), GTE-base |
+| Embedding Framework | **sentence-transformers** | Plug-and-play model loading, pooling strategies, batching utilities | Pure Python (slower than optimized Rust backends) | HuggingFace Transformers direct (fine-grained control), fastembed |
+| Orchestrator (planned) | **LlamaIndex** | High-level RAG abstractions, modular query engines, easy tool integration | Additional abstraction layer; learning curve | LangChain (broad ecosystem), manual custom pipeline (for minimalism) |
+| Reranking (optional) | **bge-reranker-base** | Good rerank MRR vs size; fully open | Adds latency per request | Cohere Rerank (if API OK), jina-reranker, cross-encoder/ms-marco models |
+| Evaluation | **Ragas** | Purpose-built RAG metrics (faithfulness, context precision) | Requires generation of QA context pairs, runtime cost | Custom sklearn metrics, TruLens (instrumentation), PromptFoo (prompt eval) |
+| JSON Perf | **orjson** | Extremely fast serialization/deserialization, dataclass & pydantic friendly | Not pure Python (binary wheel) | ujson (speed), standard json (portability) |
+| CLI | **click** | Clean decorators, colorized help, composable commands | Additional dependency | argparse (stdlib), typer (FastAPI-style) |
+| Config / Env | **python-dotenv** | Lightweight .env loading | Minimal feature set | dynaconf (if layered envs needed), pydantic-settings |
+| Data Models | **pydantic v2** | Validation + serialization, type hints synergy | Runtime overhead vs bare dataclasses | dataclasses (speed), attrs (flexibility) |
+| Heuristic Verdict | **Keyword overlap** | Deterministic, no API cost, baseline for improvement measurement | Shallow semantics; weak on paraphrase | LLM scoring, embedding similarity scoring, rule sets |
+| LLM Client (optional) | **OpenAI Python SDK** | Simple chat API, streaming support | External API cost, data governance | Local models via vLLM / llama.cpp / TGI; Mistral, Llama local |
+| Progress Bars | **tqdm** | Zero effort progress monitoring | Minor overhead | rich.progress (if richer UI needed) |
+| Linting | **ruff** | Very fast, consolidated rules (flake8 + isort + more) | Rapid evolution; occasional rule gaps | flake8 + isort + black (classic stack) |
+| Testing | **pytest** | Rich fixtures, assertions, ecosystem plugins | Slight learning curve for advanced fixtures | unittest (stdlib) |
+| CI | **GitHub Actions** | Native GitHub integration, YAML simplicity | Concurrency limits on free tier | GitLab CI, CircleCI, Jenkins |
+
+Decision Principles:
+1. Start fast with productive defaults (Chroma, bge-base) then allow upgrades (Milvus, bge-large) once metrics plateau.
+2. Keep a lexical baseline (BM25) to quantify real semantic gain instead of assuming embeddings help.
+3. Introduce LLM verdict only after retrieval quality (context precision) exceeds threshold (≥0.6) to avoid masking retrieval weaknesses.
+4. Use heuristic verdict for deterministic regression tests; gate LLM path behind a flag.
+5. Prefer components with active maintenance and clean Python API to minimize integration friction for a 1‑day build.
+
+
 ## Environment Variables (.env)
 ```
 NEWS_API_KEY=YOUR_KEY
